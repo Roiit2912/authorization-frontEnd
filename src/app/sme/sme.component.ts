@@ -1,5 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+//import {FormsModule} from '@angular/forms';
+import { TestService } from '../test.service';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -8,42 +12,36 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
   styleUrls: ['./sme.component.css']
 })
 export class SmeComponent implements OnInit {
-  signIn:any;
+  
+  myBool:any=false;
 
   registerForm: FormGroup;
   registerForm1:FormGroup;
   submitted = false;
   submitted1=false;
 
-  constructor(private formBuilder: FormBuilder) { }
+  constructor(private formBuilder: FormBuilder,private http:HttpClient, private test:TestService,private router:Router) { }
 
 
   ngOnInit() {
-   // console.log(this.signIn.email);
 
    this.registerForm = this.formBuilder.group({
-    // firstName: ['', Validators.required],
-    // lastName: ['', Validators.required],
+
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]]
 });
 
 
 this.registerForm1 = this.formBuilder.group({
-   fullName: ['', Validators.required],
-  // lastName: ['', Validators.required],
-  email: ['', [Validators.required, Validators.email]],
-  password: ['', [Validators.required, Validators.minLength(6)]]
+    //firstName: ['', Validators.required],
+    securityKey:['',Validators.required],
+    fullName: ['', Validators.required],
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(6)]]
 });
 
    
   }
-
-  myclick(signIn)
-  {
-    console.log( signIn.password+"bro");
-  }
-
 
   get f() { return this.registerForm.controls; }
 
@@ -51,15 +49,40 @@ this.registerForm1 = this.formBuilder.group({
 
     onSubmit(signIn) {
         this.submitted = true;
-
+    
         // stop here if form is invalid
         if (this.registerForm.invalid) {
             return;
         }
 
-        console.log( signIn.email);
+       this.test.smeSignIn(signIn).subscribe(token => (myfun(token.toString())));
 
-        alert('SUCCESS!! :-)')
+       function myfun(token)
+      {
+        if(token=="user does not exist")
+        {
+          alert('user does not exist');
+        }
+        else if(token=="User Password combination is not correct")
+        {
+          //console.log("&&&&&&&&", JSON.stringify(this.smeToken));
+          alert("User Password combination is not correct");
+        }
+
+        else if(token=="You are a learner, Please sign in through learner page")
+        {
+          alert("You are a learner, Please sign in through learner page");
+        }
+
+       else
+        {
+          localStorage.setItem("SME_TOKEN",token); 
+          alert("Succesful login");
+          window.location.href = "https://roiit2912.github.io/angular-assignment/search";
+          //this.router.navigateByUrl('https://roiit2912.github.io/angular-assignment/search');
+        }
+      }
+        
     }
 
     onSubmit1(signUp) {
@@ -70,9 +93,35 @@ this.registerForm1 = this.formBuilder.group({
           return;
       }
 
-      console.log( signUp.email);
+      console.log( signUp.securityKey);
+      
+      this.test.smeSignUp(signUp).subscribe(token => (myfun(token.toString())));
 
-      alert('SUCCESS!! :-)')
+      function myfun(token)
+      {
+        if(token=="User already exist")
+        {
+          alert("User already exist");
+        }
+        else if(token=="Wrong Security Key entered")
+        {
+          //console.log("&&&&&&&&", JSON.stringify(this.smeToken));
+          alert("Wrong Security Key entered");
+        }
+
+       else if(token="Success")
+        { 
+          alert("Succesfully Registerd");
+        }
+
+        else{
+          alert("some other case");
+        }
+
+      }
+
+     
+      
   }
 
 
